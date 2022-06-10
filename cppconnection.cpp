@@ -19,6 +19,7 @@ CppConnection::CppConnection(QObject *obj)
                          m_pThreadCounter_1.get(),  SLOT( startThread() )
                          );
 
+        //set connection with drawer
         QObject::connect(m_pThreadCounter_1.get(),  SIGNAL( signalThreadTick(int) ),
                          this,                      SLOT ( slotDraw(int) )
                          );
