@@ -2,7 +2,6 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>Button.qml</file>
-        <file>icons/mybutton.png</file>
         <file>icons/Blue_Button.png</file>
     </qresource>
 </RCC>
