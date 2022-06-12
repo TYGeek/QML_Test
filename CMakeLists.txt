@@ -1,31 +1,37 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.16)
 
 project(QML_Test VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(CMAKE_AUTOUIC ON)
+#set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
+#set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Quick )
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick )
-
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Quick Qml)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick Qml)
+qt_standard_project_setup()
 set(PROJECT_SOURCES
         main.cpp
-        qml.qrc
-        cppconnection.h cppconnection.cpp
-        counter.h counter.cpp
+        cppconnection.h
+        cppconnection.cpp
+        threadcollection.h threadcollection.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(QML_Test
         MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-    )
+        ${PROJECT_SOURCES})
+
+qt6_add_qml_module(QML_Test
+                    URI visual
+                    VERSION 1.0
+                    RESOURCES icons/Blue_Button.png
+                    QML_FILES main.qml Button.qml
+                    SOURCES cppconnection.h cppconnection.cpp)
 
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET QML_Test APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -51,7 +57,8 @@ target_compile_definitions(QML_Test
 
 target_link_libraries(QML_Test
   PRIVATE   Qt${QT_VERSION_MAJOR}::Core
-            Qt${QT_VERSION_MAJOR}::Quick)
+            Qt${QT_VERSION_MAJOR}::Quick
+            Qt${QT_VERSION_MAJOR}::Qml)
 
 
 set_target_properties(QML_Test PROPERTIES
@@ -66,3 +73,5 @@ if(QT_VERSION_MAJOR EQUAL 6)
     qt_import_qml_plugins(QML_Test)
     qt_finalize_executable(QML_Test)
 endif()
+
+#set(QML_IMPORT_PATH ${CMAKE_SOURCE_DIR}/qml ${CMAKE_BINARY_DIR}/imports CACHE STRING "" FORCE)

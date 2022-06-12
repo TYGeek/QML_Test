@@ -1,38 +1,40 @@
 #include "counter.h"
-
-Counter::Counter(int id, int value):
+#include<QThread>
+#include<QCoreApplication>
+Counter::Counter(int id, int value, QObject* ptr):QObject{ptr},
     m_id{id},
     m_value{value}
 {
 
 }
 
-void Counter::run()
+void Counter::doCount()
 {
-    for(int i = 0; i < 10; ++i)
+   while(m_value < 100000)
     {
         m_mutex.lock();
-
-        usleep(1000000);
-        m_value = i;
+        m_value += 1;
         emit signalThreadTick(m_value);
-
         m_mutex.unlock();
     }
+   if(m_value > 100000)
+   {
+       emit finished();
+   }
+
 
 }
 
-void Counter::pauseThread()
-{
-    if( !m_mutex.tryLock() )
-        m_mutex.lock();
-}
+//void Counter::pauseThread()
+//{
+////    if( !m_mutex.tryLock() )
+////       m_mutex.lock();
+//}
 
-void Counter::startThread()
-{
-   if (!isRunning())
-       start();
-   else
-       m_mutex.unlock();
+//void Counter::continueThread()
+//{
+////    if(m_mutex.tryLock())
+////        m_mutex.unlock();
+//}
 
-}
+

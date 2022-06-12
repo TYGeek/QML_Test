@@ -1,15 +1,15 @@
 #ifndef COUNTER_H
 #define COUNTER_H
 
-#include <QThread>
+#include <QObject>
 #include <QMutex>
 
-class Counter: public QThread
+class Counter: public QObject
 {
     Q_OBJECT
 public:
-    Counter(int id, int value);
-    void run() override;
+    Counter(int id, int value, QObject* ptr = 0);
+
     QMutex m_mutex;
 
 private:
@@ -17,12 +17,12 @@ private:
     int m_value;
 
 public slots:
-    void pauseThread();
-    void startThread();
-
+//    void pauseThread();
+//    void continueThread();
+    void doCount();
 signals:
     void signalThreadTick(int);
-
+    void finished();
 };
 
 #endif // COUNTER_H

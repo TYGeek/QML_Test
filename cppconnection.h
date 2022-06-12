@@ -1,27 +1,36 @@
 #ifndef CPPCONNECTION_H
 #define CPPCONNECTION_H
 
+#include <QtQml/qqmlregistration.h>
 #include <QObject>
-#include <QMutex>
-#include <QWaitCondition>
-#include "counter.h"
+class QThread;
+class ThreadConsumer;
+class ThreadProducer;
 
-
-class CppConnection : public QObject
+class Controller : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(int value READ readValue WRITE setValue NOTIFY valueChanged); //NOTIFY valueChanged)
+    QML_ELEMENT
 public:
-    explicit CppConnection(QObject *obj);
+    Controller(QObject *obj = 0);
 
-
+    Q_INVOKABLE void start();
 public slots:
-    void slotDraw(int);
-
+    void setValue(int);
 private:
-    QObject* m_pObj;
-    std::unique_ptr<Counter> m_pThreadCounter_1;
+    int readValue();
+    int current_value;
+    bool workStatus;
+    ThreadConsumer* consumer;
+    ThreadProducer* counter_1;
+    ThreadProducer* counter_2;
 
-    int m_numThreadReady;
+    QThread* consumerThread;
+    QThread* counter_1Thread;
+    QThread* counter_2Thread;
+signals:
+    void valueChanged();
 };
 
 #endif // CPPCONNECTION_H

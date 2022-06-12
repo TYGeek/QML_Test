@@ -1,6 +1,6 @@
-import QtQuick 2.14
-import QtQuick.Window 2.14
-import visual 1.0
+import QtQuick 2.15
+import QtQuick.Window 2.15
+//import visual
 Window {
 
     width: 640
@@ -9,22 +9,16 @@ Window {
     visible: true
     title: qsTr("Hello World")
 
-    Controller
-    {
-       id:connector
-       onValueChanged:
-       {
-           txt.text = value
-           txt
-       }
-    }
-
+//    CppConnection
+//    {
+//        : txt.text = result
+//    }
     Text {
         id: txt
         objectName: "textObj"
         height: 100
         width: 100
-        text: connector.result
+        text: "12"
         anchors.top: parent.top
         anchors.left: parent.left
     }
@@ -35,7 +29,6 @@ Window {
         text: "Start"
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        onClicked: connector.start()
     }
 
     Button {

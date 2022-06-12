@@ -4,6 +4,7 @@ Image {
     property alias text: txt.text
     signal clicked();
     source: "icons/Blue_Button.png"
+
    width: 110*2
    height: 34*2
 
@@ -14,7 +15,6 @@ Image {
     }
 
     MouseArea {
-        id: field
         anchors.fill: parent
         onClicked: parent.clicked();
     }
