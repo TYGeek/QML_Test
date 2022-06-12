@@ -1,0 +1,109 @@
+Checks: 'clang-diagnostic-*,
+  clang-analyzer-*,
+    -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
+  boost-use-to-string,
+  bugprone-*,
+  cert-dcl21-cpp,
+  cert-dcl50-cpp,
+  cert-dcl58-cpp,
+  cert-env33-c,
+  cert-err34-c,
+  cert-err52-cpp,
+  cert-flp30-c,
+  cert-mem57-cpp,
+  cert-msc50-cpp,
+  cert-msc51-cpp,
+  cert-oop57-cpp,
+  cert-oop58-cpp,
+  google-*,
+    -google-runtime-references,
+  hicpp-signed-bitwise,
+  misc-*,
+    -misc-throw-by-value-catch-by-reference,
+    -misc-no-recursion,
+  modernize-*,
+    -modernize-use-trailing-return-type,
+  performance-*,
+  readability-*,
+    -readability-convert-member-functions-to-static,
+    -readability-implicit-bool-conversion,
+    -readability-redundant-member-init,
+    # Works wrong with Q_SIGNALS and Q_SLOTS,
+    -readability-redundant-access-specifiers'
+WarningsAsErrors: '*'
+HeaderFilterRegex: ''
+AnalyzeTemporaryDtors: false
+FormatStyle: file
+CheckOptions:
+  - key:             readability-magic-numbers.IgnoredIntegerValues
+    value:           '1;2;3;4;8;10;16;90;100;180;360'
+  - key:             readability-magic-numbers.IgnoredFloatingPointValues
+    value:           '.5;-.5;1.;-1.;2.;-2;3.;-3.;4.;-4.;8.;-8.;10.;16.;-16.;90.;-90.;100.;180.;-180.;360.'
+  - key:             readability-identifier-naming.ClassCase
+    value:           'CamelCase'
+  - key:             readability-identifier-naming.ConstantCase
+    value:           'UPPER_CASE'
+# Causes false positives on members like m_p*, or m_sp*. Defined explicitly because
+# inherited from ConstantCase.
+  - key:             readability-identifier-naming.ConstantMemberCase
+    value:           'aNy_CasE'
+  - key:             readability-identifier-naming.ConstantParameterCase
+    value:           'camelBack'
+  - key:             readability-identifier-naming.EnumCase
+    value:           'CamelCase'
+  - key:             readability-identifier-naming.EnumConstantCase
+    value:           'CamelCase'
+  - key:             readability-identifier-naming.FunctionCase
+    value:           'camelBack'
+  - key:             readability-identifier-naming.GlobalVariableCase
+    value:           'UPPER_CASE'
+# aNy_CasE because this can be a compile-time constant as well as runtime constant.
+  - key:             readability-identifier-naming.LocalConstantCase
+    value:           'aNy_CasE'
+  - key:             readability-identifier-naming.LocalPointerCase
+    value:           'camelBack'
+# Causes false positive on iterators.
+#  - key:             readability-identifier-naming.LocalPointerPrefix
+#    value:           'p'
+# Causes false positive on externally defined macros.
+#  - key:             readability-identifier-naming.MacroDefinitionCase
+#    value:           'UPPER_CASE'
+  - key:             readability-identifier-naming.MemberCase
+    value:           'camelBack'
+  - key:             readability-identifier-naming.MethodCase
+    value:           'camelBack'
+  - key:             readability-identifier-naming.ParameterCase
+    value:           'camelBack'
+  - key:             readability-identifier-naming.PointerParameterCase
+    value:           'camelBack'
+# Causes false positive on `QObject* parent` and iterators.
+#  - key:             readability-identifier-naming.PointerParameterPrefix
+#    value:           'p'
+# Causes false positive on members like m_p*, or m_sp*.
+#  - key:             readability-identifier-naming.PrivateMemberCase
+#    value:           'CamelCase'
+  - key:             readability-identifier-naming.PrivateMemberPrefix
+    value:           'm_'
+# Causes false positive on members like m_p*, or m_sp*.
+#  - key:             readability-identifier-naming.ProtectedMemberCase
+#    value:           'CamelCase'
+  - key:             readability-identifier-naming.ProtectedMemberPrefix
+    value:           'm_'
+  - key:             readability-identifier-naming.StructCase
+    value:           'CamelCase'
+  - key:             readability-identifier-naming.TemplateParameterCase
+    value:           'CamelCase'
+  - key:             readability-identifier-naming.TypeAliasCase
+    value:           'CamelCase'
+  - key:             readability-identifier-naming.TypedefCase
+    value:           'CamelCase'
+  - key:             readability-identifier-naming.UnionCase
+    value:           'CamelCase'
+  - key:             readability-identifier-naming.ValueTemplateParameterCase
+    value:           'UPPER_CASE'
+  - key:             readability-identifier-naming.VariableCase
+    value:           'camelBack'
+  - key:             misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
+    value:           1
+  - key:             readability-function-cognitive-complexity.IgnoreMacros
+    value:           true
