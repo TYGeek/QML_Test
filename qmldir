@@ -1,5 +1,0 @@
-module com.visual
-typeinfo QML_Test.qmltypes
-prefer :/com.visual/./com/visual/
-Button 1.0 Button.qml
-
