@@ -9,10 +9,12 @@ class ThreadProducer: public QObject
 {
     Q_OBJECT
 public:
-    ThreadProducer();
-    void stopThread();
+    ThreadProducer(QObject* parent = 0);
+
+
 public slots:
-    void process();
+    void slotProcess();
+    void slotStop();
 
 private:
     int m_id;
@@ -21,7 +23,7 @@ private:
 
 signals:
     void signalValueChanged();
-    void finished();
+    void signalFinished();
 };
 
 
@@ -29,18 +31,21 @@ class ThreadConsumer : public QObject
 {
     Q_OBJECT
 public:
-    ThreadConsumer();
+    ThreadConsumer(QObject* parent = 0);
 
 public slots:
-    void process();
-    void stopThread();
+    void slotPause();
+    void slotProcess();
+    void slotStop();
+
 
 private:
     bool m_stop;
+    bool m_pause;
 
 signals:
-    void newSum(int sum);
-    void finished();
+    void signalReadySumm(int sum);
+    void signalFinished();
 
 };
 

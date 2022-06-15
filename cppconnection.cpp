@@ -1,78 +1,110 @@
 #include "cppconnection.h"
 #include <QDebug>
 #include <QQmlComponent>
-#include<QThread>
+#include <QThread>
 #include "threadcollection.h"
 
 
 Controller::Controller(QObject *obj) : QObject{nullptr}
-
 {
 
-//        connect(counter_2, SIGNAL(finished()), consumer, SLOT(stopThread()));
-}
+    consumer = new ThreadConsumer;
+    counter_1 = new ThreadProducer;
+    counter_2 = new ThreadProducer;
 
+    consumerThread = new QThread(this);
+    counter_1Thread = new QThread(this);
+    counter_2Thread = new QThread(this);
+
+    consumer->moveToThread(consumerThread);
+    counter_1->moveToThread(counter_1Thread);
+    counter_2->moveToThread(counter_2Thread);
+
+
+    // stop connection
+    QObject::connect(this,      &Controller::signalStop,
+                     consumer,  &ThreadConsumer::slotStop);
+    QObject::connect(this,      &Controller::signalStop,
+                     counter_1, &ThreadProducer::slotStop);
+    QObject::connect(this,      &Controller::signalStop,
+                     counter_2, &ThreadProducer::slotStop);
+    // pause connection
+    QObject::connect(this,      &Controller::signalPause,
+                     consumer,  &ThreadConsumer::slotPause);
+
+
+    // set consumer <-> controller connection
+    QObject::connect(consumer,  &ThreadConsumer::signalReadySumm,
+                     this,      &Controller::setValue);
+
+    // set consumer <-> thread connecion
+    QObject::connect(consumerThread, &QThread::started,
+                     consumer,       &ThreadConsumer::slotProcess);
+
+    QObject::connect(consumer,       &ThreadConsumer::signalFinished,
+                     consumerThread, &QThread::quit);
+
+//    QObject::connect(consumer, &ThreadConsumer::signalFinished,
+//                     consumer, &ThreadConsumer::deleteLater);
+
+//    QObject::connect(consumerThread, &QThread::finished,
+//                     consumerThread, &QThread::deleteLater);
+
+    // set counter_1 <-> thread connecion
+    QObject::connect(counter_1Thread,    &QThread::started,
+                     counter_1,          &ThreadProducer::slotProcess);
+
+    QObject::connect(counter_1,          &ThreadProducer::signalFinished,
+                     counter_1Thread,    &QThread::quit);
+
+//    QObject::connect(counter_1, &ThreadProducer::signalFinished,
+//                     counter_1, &ThreadProducer::deleteLater);
+
+//    QObject::connect(counter_1Thread, &QThread::finished,
+//                     counter_1Thread, &QThread::deleteLater);
+
+    // set counter_2 <-> thread connecion
+    QObject::connect(counter_2Thread,    &QThread::started,
+                     counter_2,          &ThreadProducer::slotProcess);
+
+    QObject::connect(counter_2,          &ThreadProducer::signalFinished,
+                     counter_2Thread,    &QThread::quit);
+
+//    QObject::connect(counter_2, &ThreadProducer::signalFinished,
+//                     counter_2, &ThreadProducer::deleteLater);
+
+//    QObject::connect(counter_2Thread, &QThread::finished,
+//                     counter_2Thread, &QThread::deleteLater);
+
+}
 
 void Controller::setValue(int value)
 {
    current_value = value;
-   emit valueChanged();
+   emit signalValueChanged();
 }
 
 void Controller::start()
 {
-    if(consumer != nullptr)
-       consumer = nullptr;
-    consumer = new ThreadConsumer;
-    if(counter_1 != nullptr)
-       counter_1 = nullptr;
-    counter_1 = new ThreadProducer;
-    if(counter_2 != nullptr)
-       counter_2 = nullptr;
-    counter_2 = new ThreadProducer;
-    //static ThreadProducer* counter_3 = new ThreadProducer;
-    if(consumerThread != nullptr)
-       consumerThread = nullptr;
-    consumerThread = new QThread;
-    if(counter_1Thread != nullptr)
-       counter_1Thread = nullptr;
-    counter_1Thread = new QThread;
-    if(counter_2Thread != nullptr)
-       counter_2Thread = nullptr;
-    counter_2Thread = new QThread;
+    consumerThread->start();
+    counter_1Thread->start();
+    counter_2Thread->start();
+}
 
-    connect(consumer, SIGNAL(newSum(int)), this, SLOT(setValue(int)));
-    connect(counter_1, SIGNAL(finished()), consumer, SLOT(stopThread()));
+void Controller::pause()
+{
+    consumer->slotPause();
 
-    if(!consumerThread->isRunning())
-    {
-        consumer->moveToThread(consumerThread);
-        connect(consumerThread, SIGNAL(started()), consumer, SLOT(process()));
-        connect(consumer, SIGNAL(finished()), consumerThread, SLOT(quit()));
-        connect(consumer, SIGNAL(finished()), consumer, SLOT(deleteLater()));
-        connect(consumerThread, SIGNAL(finished()), consumerThread, SLOT(deleteLater()));
-        consumerThread->start();
-    }
+    //emit signalPause();
+}
 
-    if(!counter_1Thread->isRunning())
-    {
-        counter_1->moveToThread(counter_1Thread);
-        connect(counter_1Thread, SIGNAL(started()), counter_1, SLOT(process()));
-        connect(counter_1, SIGNAL(finished()), counter_1Thread, SLOT(quit()));
-        connect(counter_1, SIGNAL(finished()), counter_1, SLOT(deleteLater()));
-        connect(counter_1Thread, SIGNAL(finished()), counter_1Thread, SLOT(deleteLater()));
-        counter_1Thread->start();
-    }
+void Controller::stop()
+{
+    consumer->slotStop();
+    counter_1->slotStop();
+    counter_2->slotStop();
 
-    if(!counter_2Thread->isRunning())
-    {
-        counter_2->moveToThread(counter_2Thread);
-        connect(counter_2Thread, SIGNAL(started()), counter_2, SLOT(process()));
-        connect(counter_2, SIGNAL(finished()), counter_2Thread, SLOT(quit()));
-        connect(counter_2, SIGNAL(finished()), counter_2, SLOT(deleteLater()));
-        connect(counter_2Thread, SIGNAL(finished()), counter_2Thread, SLOT(deleteLater()));
-        counter_2Thread->start();
-    }
+    //emit signalStop();
 }
 
 int Controller::readValue()
@@ -80,5 +112,18 @@ int Controller::readValue()
     return current_value;
 }
 
+Controller::~Controller()
+{
+    consumer->deleteLater();
+    counter_1->deleteLater();
+    counter_2->deleteLater();
 
+    consumerThread->quit();
+    consumerThread->deleteLater();
 
+    counter_1Thread->quit();
+    counter_1Thread->deleteLater();
+
+    counter_2Thread->quit();
+    counter_2Thread->deleteLater();
+}

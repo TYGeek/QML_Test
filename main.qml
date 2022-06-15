@@ -1,6 +1,7 @@
 import QtQuick 2.14
 import QtQuick.Window 2.14
 import visual 1.0
+
 Window {
 
     width: 640
@@ -9,13 +10,11 @@ Window {
     visible: true
     title: qsTr("Hello World")
 
-    Controller
-    {
+    Controller {
        id:connector
-       onValueChanged:
+       onSignalValueChanged:
        {
            txt.text = value
-           txt
        }
     }
 
@@ -27,6 +26,7 @@ Window {
         text: connector.result
         anchors.top: parent.top
         anchors.left: parent.left
+
     }
 
     Button {
@@ -44,6 +44,7 @@ Window {
         anchors.left: idStart.right
         anchors.bottom: parent.bottom
         text: "Stop"
+        onClicked: connector.stop()
     }
 
     Button {
@@ -51,7 +52,8 @@ Window {
         objectName: "btnPause"
         anchors.left: idStop.right
         anchors.bottom: parent.bottom
-        text: "Pause"
+        text: "Pause/Resume"
+        onClicked: connector.pause()
     }
 
 

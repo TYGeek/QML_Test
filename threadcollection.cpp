@@ -3,17 +3,21 @@
 #include <QMutex>
 #include <QDebug>
 #include <QThread>
+#include <QWaitCondition>
+
 
 static QMutex mutex;
 static QSemaphore turnstile1(0);
 static QSemaphore turnstile2(0);
 static QSemaphore dataReady(0);
+static QSemaphore pauseConsumer(1);
+
 static int totalThreadProducer = 0;
 static int curThreads = 0;
 static int summ = 0;
 
 
-ThreadProducer::ThreadProducer():
+ThreadProducer::ThreadProducer(QObject* parent):
     m_id{10},
     m_value{0},
     m_stop{false}
@@ -21,15 +25,17 @@ ThreadProducer::ThreadProducer():
     totalThreadProducer += 1;
 }
 
-void ThreadProducer::stopThread()
+void ThreadProducer::slotStop()
 {
     QMutexLocker locker(&mutex);
     m_stop = true;
-    emit finished();
+    emit signalFinished();
 }
 
-void ThreadProducer::process()
+void ThreadProducer::slotProcess()
 {
+    m_stop = false;
+    m_value = 0;
     // Cycle body
     while(!m_stop)
     {
@@ -60,38 +66,56 @@ void ThreadProducer::process()
 
         // stop thread if count to 100
         if ( m_value == 10 )
-            stopThread();
+            slotStop();
 
     }
 }
 
 
 // --------------------------- ThreadConsumer ----------------------------
-ThreadConsumer::ThreadConsumer():
-    m_stop{false}
+ThreadConsumer::ThreadConsumer(QObject* parent):
+    m_stop{false},
+    m_pause{false}
 {
 
 }
 
-void ThreadConsumer::stopThread()
+void ThreadConsumer::slotStop()
 {
     QMutexLocker  locker(&mutex);
     m_stop = true;
-    emit finished();
+    emit signalFinished();
 }
 
-void ThreadConsumer::process()
+void ThreadConsumer::slotPause()
 {
+    QMutexLocker locker(&mutex);
+
+    if (m_pause)
+    {
+        pauseConsumer.release();
+        m_pause = false;
+    }
+    else
+    {
+        pauseConsumer.acquire();
+        m_pause = true;
+    }
+}
+
+void ThreadConsumer::slotProcess()
+{
+    m_stop = false;
     while(!m_stop)
     {
+        pauseConsumer.acquire();
+        pauseConsumer.release();
+
         dataReady.acquire();
         mutex.lock();
-
-        QThread::sleep(1);
-         emit newSum(summ);
-
-         qDebug() << summ;
-
+            QThread::sleep(1);
+            emit signalReadySumm(summ);
+            qDebug() << summ;
             summ = 0;
         mutex.unlock();
         turnstile2.release(totalThreadProducer); // unlock second turnstile
